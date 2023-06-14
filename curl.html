@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Curl Command Generator</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            width: 500px;
+            max-width: 500px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            resize: vertical;
+        }
+
+        .header-section {
+            margin-bottom: 10px;
+        }
+
+        .header-field {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .header-field input[type="text"] {
+            flex: 1;
+        }
+
+        .header-field button {
+            margin-left: 10px;
+        }
+
+        .add-header-button {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            margin-bottom: 10px;
+        }
+
+        button {
+            display: block;
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #4caf50;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #curlCommandOutput {
+            background-color: #f0f0f0;
+            padding: 10px;
+            white-space: pre-wrap;
+            word-break: break-all;
+            font-size: 14px;
+        }
+    </style>
+    <script>
+        function addHeaderField(headerSection) {
+            var headerField = document.createElement("div");
+            headerField.className = "header-field";
+            headerField.innerHTML = `
+                <input type="text" name="headerKey[]" placeholder="Key">
+                <input type="text" name="headerValue[]" placeholder="Value">
+                <button type="button" onclick="removeHeaderField(this)">X</button>
+            `;
+            headerSection.querySelector('.header-section').appendChild(headerField);
+        }
+    
+        function removeHeaderField(button) {
+            var headerField = button.parentNode;
+            headerField.parentNode.removeChild(headerField);
+        }
+    
+        function generateCurlCommand() {
+            var domain = document.getElementById("domain").value;
+            var uri = document.getElementById("uri").value;
+            var headerSections = document.getElementsByClassName("header-section");
+            var method = document.getElementById("method").value;
+            var data = document.getElementById("data").value;
+    
+            // Remove spaces and line breaks from data
+            data = data.replace(/\s/g, '');
+    
+            var headerString = "";
+            for (var i = 0; i < headerSections.length; i++) {
+                var headerKeys = headerSections[i].querySelectorAll("input[name='headerKey[]']");
+                var headerValues = headerSections[i].querySelectorAll("input[name='headerValue[]']");
+    
+                var sectionHeaderString = "";
+                for (var j = 0; j < headerKeys.length; j++) {
+                    var key = headerKeys[j].value.trim();
+                    var value = headerValues[j].value.trim();
+    
+                    if (key !== "" && value !== "") {
+                        sectionHeaderString += "-H '" + key + ": " + value + "' ";
+                    }
+                }
+    
+                if (sectionHeaderString !== "") {
+                    headerString += sectionHeaderString;
+                }
+            }
+    
+            var curlCommand = "curl -X " + method + " " + headerString;
+            if (data !== "") {
+                curlCommand += "-d '" + data + "' ";
+            }
+            curlCommand += domain + uri;
+    
+            document.getElementById("curlCommandOutput").textContent = curlCommand;
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Curl Command Generator</h1>
+
+        <label for="domain">도메인 주소:</label>
+        <input type="text" id="domain" name="domain">
+
+        <label for="uri">URI:</label>
+        <input type="text" id="uri" name="uri">
+
+        <div id="headerContainer">
+            <label for="header-section">헤더 정보:</label>
+            <div class="add-header-button">
+                <button type="button" onclick="addHeaderField(headerContainer)">헤더 추가</button>
+            </div>
+            <div class="header-section">
+            </div>
+        </div>
+
+        <label for="method">메서드:</label>
+        <select id="method" name="method">
+            <option value="GET">GET</option>
+            <option value="POST">POST</option>
+            <option value="PUT">PUT</option>
+            <option value="DELETE">DELETE</option>
+        </select>
+
+        <label for="data">데이터:</label>
+        <textarea id="data" name="data"></textarea>
+
+        <button onclick="generateCurlCommand()">Curl 명령어 생성</button>
+
+        <h2>생성된 Curl 명령어:</h2>
+        <pre id="curlCommandOutput"></pre>
+    </div>
+</body>
+</html>
