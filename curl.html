@@ -145,6 +145,12 @@
     
             document.getElementById("curlCommandOutput").textContent = curlCommand;
         }
+        
+        function copyToClipboard() {
+            var curlCommandOutput = document.getElementById("curlCommandOutput");
+            curlCommandOutput.select();
+            document.execCommand("copy");
+        }
     </script>
 </head>
 <body>
@@ -180,7 +186,8 @@
         <button onclick="generateCurlCommand()">Curl 명령어 생성</button>
 
         <h2>생성된 Curl 명령어:</h2>
-        <pre id="curlCommandOutput"></pre>
+        <textarea id="curlCommandOutput" readonly></textarea>
+        <button onclick="copyToClipboard()">복사하기</button>
     </div>
 </body>
 </html>
